@@ -2,7 +2,7 @@ from pathlib import Path
 
 from textual.app import App, ComposeResult
 from textual.screen import Screen
-from textual.widgets import DirectoryTree, Header, Footer, Tree, Static
+from textual.widgets import DirectoryTree, Header, Footer, Static
 
 
 class ChoosePathScreen(Screen):
