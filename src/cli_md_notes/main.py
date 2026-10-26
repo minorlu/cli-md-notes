@@ -1,12 +1,9 @@
 from pathlib import Path
 
-from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer
-from textual.binding import Binding
-from textual.reactive import reactive
+from textual.app import App
 
-from cli_md_notes.screens.choosepathscreen import ChoosePathScreen
-from cli_md_notes.screens.notesscreen import NotesScreen
+from cli_md_notes.screens.choose_path_screen import ChoosePathScreen
+from cli_md_notes.screens.notes_screen import NotesScreen
 
 
 class CliMdNotesApp(App):
@@ -14,15 +11,10 @@ class CliMdNotesApp(App):
 
     notes_path: Path | None = None
 
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
-
     def on_mount(self) -> None:
         self.title = "CLI MD-Notes"
-        self.theme = "tokyo-night"
+        self.app.theme = "tokyo-night"
         self.push_screen(ChoosePathScreen(), callback=self.receive_path)
-
 
     def receive_path(self, path: Path | None) -> None:
         if path is None:

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from textual.app import App, ComposeResult
+from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import DirectoryTree, Header, Footer, Tree, Static
 
@@ -19,4 +19,3 @@ class NotesScreen(Screen):
 
     def on_mount(self) -> None:
         self.title = f"CLI MD-Notes - {self.notes_path}"
-        self.theme = "tokyo-night"
