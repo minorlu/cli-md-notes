@@ -1,3 +1,7 @@
 DirectoryTree {
-    background: $boost;
+    width: 1fr;
+}
+
+Static {
+    width: 2fr;
 }

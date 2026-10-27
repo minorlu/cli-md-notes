@@ -3,6 +3,7 @@ from pathlib import Path
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import DirectoryTree, Header, Footer, Tree, Static
+from textual.containers import HorizontalGroup
 
 
 class NotesScreen(Screen):
@@ -14,8 +15,11 @@ class NotesScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield DirectoryTree(self.notes_path)
+        with HorizontalGroup():
+            yield DirectoryTree(self.notes_path, id="notes-directory")
+            yield Static("Notes area")
         yield Footer()
 
     def on_mount(self) -> None:
-        self.title = f"CLI MD-Notes - {self.notes_path}"
+        self.title = "CLI MD-Notes"
+        self.sub_title = f"{self.notes_path}"
