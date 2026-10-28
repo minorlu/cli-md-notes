@@ -4,6 +4,7 @@ from textual.app import App
 
 from .screens import ChoosePathScreen
 from .screens import NotesScreen
+from .utils import is_init_dir_exists
 
 
 class CliMdNotesApp(App):
