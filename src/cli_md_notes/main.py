@@ -16,6 +16,7 @@ class CliMdNotesApp(App):
         self.title = "CLI MD-Notes"
         self.app.theme = "tokyo-night"
         self.push_screen(ChoosePathScreen(), callback=self.receive_path)
+        self.notify(f"{is_init_dir_exists()}")
 
     def receive_path(self, path: Path | None) -> None:
         if path is None:
