@@ -5,6 +5,7 @@ from textual.screen import Screen
 from textual.widgets import DirectoryTree, Header, Footer, Tree, Static
 from textual.containers import HorizontalGroup
 
+from cli_md_notes.widgets.filtered_directory_tree import FilteredDirectoryTree
 
 class NotesScreen(Screen):
     CSS_PATH = "styles.tcss"
@@ -16,8 +17,8 @@ class NotesScreen(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
         with HorizontalGroup():
-            yield DirectoryTree(self.notes_path, id="notes-directory")
-            yield Static("Notes area")
+            yield FilteredDirectoryTree(self.notes_path, id="notes-directory")
+            yield Static("Notes area", id="notes-area")
         yield Footer()
 
     def on_mount(self) -> None:

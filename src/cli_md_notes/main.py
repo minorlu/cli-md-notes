@@ -2,8 +2,8 @@ from pathlib import Path
 
 from textual.app import App
 
-from cli_md_notes.screens.choose_path_screen import ChoosePathScreen
-from cli_md_notes.screens.notes_screen import NotesScreen
+from .screens import ChoosePathScreen
+from .screens import NotesScreen
 
 
 class CliMdNotesApp(App):

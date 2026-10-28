@@ -1,7 +1,7 @@
-DirectoryTree {
+#notes-directory {
     width: 1fr;
 }
 
-Static {
+#notes-area {
     width: 2fr;
 }
