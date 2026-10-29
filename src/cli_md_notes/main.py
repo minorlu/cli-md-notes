@@ -4,13 +4,14 @@ from textual.app import App
 
 from .screens import ChoosePathScreen
 from .screens import NotesScreen
-from .utils import get_init_dir, save_notes_path
+from .utils import get_init_dir, set_init_dir
 
 
 class CliMdNotesApp(App):
     CSS_PATH = "styles.tcss"
 
     notes_path: Path | None = None
+    initial_dir = Path("/")
 
     def on_mount(self) -> None:
         self.title = "CLI MD-Notes"
@@ -26,7 +27,7 @@ class CliMdNotesApp(App):
             return
 
         self.notes_path = path
-        save_notes_path(self.notes_path)
+        set_init_dir(self.notes_path)
         self.push_screen(NotesScreen(self.notes_path))
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 
-def save_notes_path(directory_path: Path) -> None:
+def set_init_dir(directory_path: Path) -> None:
     config_file_path = Path("conf.json")
     config_file_data = {}
     if os.path.exists(config_file_path):
