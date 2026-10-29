@@ -5,3 +5,8 @@
 #notes-area {
     width: 2fr;
 }
+
+.input-hidden {
+    display: none;
+    visibility: hidden;
+}
