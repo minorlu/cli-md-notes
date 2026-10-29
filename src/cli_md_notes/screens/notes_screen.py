@@ -5,7 +5,8 @@ from textual.screen import Screen
 from textual.widgets import DirectoryTree, Header, Footer, Tree, Static
 from textual.containers import HorizontalGroup
 
-from cli_md_notes.widgets.filtered_directory_tree import FilteredDirectoryTree
+from cli_md_notes.widgets import FilteredDirectoryTree
+
 
 class NotesScreen(Screen):
     CSS_PATH = "styles.tcss"
