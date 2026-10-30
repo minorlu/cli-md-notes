@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from textual.app import ComposeResult
@@ -6,6 +7,7 @@ from textual.widgets import Header, Footer, TextArea, Input
 from textual.containers import HorizontalGroup
 
 from cli_md_notes.widgets import FilteredDirectoryTree
+from cli_md_notes.core import create_folder
 
 
 class NotesScreen(Screen):
@@ -17,10 +19,14 @@ class NotesScreen(Screen):
     def __init__(self, notes_path: Path) -> None:
         super().__init__()
         self.notes_path = notes_path
+        self.current_node_path = self.notes_path
+        self.node_extension = ""
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Input(placeholder="Input folder name to create", classes="input-hidden")
+        yield Input(placeholder="Input folder name to create",
+                    classes="input-hidden",
+                    id="node-name-input")
         with HorizontalGroup():
             yield FilteredDirectoryTree(self.notes_path, id="notes-directory")
             yield TextArea("", id="notes-area")
@@ -30,10 +36,33 @@ class NotesScreen(Screen):
         self.title = "CLI MD-Notes"
         self.sub_title = f"{self.notes_path}"
 
+    def on_input_submitted(self, event: Input.Submitted, ):
+        new_node_name = event.value + self.node_extension
+        if not new_node_name.strip():
+            self.notify("The folder name should not be empty")
+            return
+
+        try:
+            create_folder(self.current_node_path, new_node_name)
+        except Exception as ex:
+            self.notify(str(ex))
+            return
+
+        directory_tree = self.query_one("#notes-directory")
+        directory_tree.reload()
+
+        input_widget = self.query_one("#node-name-input")
+        input_widget.clear()
+        input_widget.add_class("input-hidden")
+
     def action_create_folder(self) -> None:
         directory_tree = self.query_one(FilteredDirectoryTree)
         current_node = directory_tree.cursor_node
-        current_node_path = current_node.data.path
+        self.current_node_path = current_node.data.path
 
-        folder_name_input = self.query_one("Input.input-hidden")
+        if not self.current_node_path.is_dir():
+            self.notify("Select folder, not file!")
+            return
+
+        folder_name_input = self.query_one("#node-name-input")
         folder_name_input.remove_class("input-hidden")
