@@ -10,7 +10,8 @@ from cli_md_notes.core import (
     create_folder,
     create_file,
     delete_folder,
-    delete_file
+    delete_file,
+    rename_folder
 )
 
 
@@ -29,6 +30,7 @@ class NotesScreen(Screen):
         self.notes_path = notes_path
         self.current_node_path = self.notes_path
         self.node_type = ""
+        self.rename_mode = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -50,6 +52,14 @@ class NotesScreen(Screen):
             self.notify("The node name should not be empty")
             return
 
+        if self.rename_mode:
+            if self.current_node_path.is_dir():
+                rename_folder(self.current_node_path, new_node_name)
+
+            self.rename_mode = False
+            self.reload_page_hide_input()
+            return
+
         try:
             match self.node_type:
                 case "folder":
@@ -65,12 +75,7 @@ class NotesScreen(Screen):
             self.notify(str(ex))
             return
 
-        directory_tree = self.query_one("#notes-directory")
-        directory_tree.reload()
-
-        input_widget = self.query_one("#node-name-input")
-        input_widget.clear()
-        input_widget.add_class("input-hidden")
+        self.reload_page_hide_input()
 
     def create_node_helper(self, node_type: str) -> None:
         directory_tree = self.query_one(FilteredDirectoryTree)
@@ -84,6 +89,14 @@ class NotesScreen(Screen):
         self.node_type = node_type
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
+
+    def reload_page_hide_input(self):
+        directory_tree = self.query_one("#notes-directory")
+        directory_tree.reload()
+
+        input_widget = self.query_one("#node-name-input")
+        input_widget.clear()
+        input_widget.add_class("input-hidden")
 
     def action_create_folder(self) -> None:
         self.create_node_helper("folder")
@@ -106,3 +119,13 @@ class NotesScreen(Screen):
 
         directory_tree = self.query_one("#notes-directory")
         directory_tree.reload()
+
+    def action_rename_node(self) -> None:
+        directory_tree = self.query_one(FilteredDirectoryTree)
+        current_node = directory_tree.cursor_node
+        self.current_node_path = current_node.data.path
+
+        self.rename_mode = True
+
+        node_name_input = self.query_one("#node-name-input")
+        node_name_input.remove_class("input-hidden")
