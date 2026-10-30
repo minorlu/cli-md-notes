@@ -11,7 +11,8 @@ from cli_md_notes.core import (
     create_file,
     delete_folder,
     delete_file,
-    rename_folder
+    rename_folder,
+    rename_file
 )
 
 
@@ -55,7 +56,8 @@ class NotesScreen(Screen):
         if self.rename_mode:
             if self.current_node_path.is_dir():
                 rename_folder(self.current_node_path, new_node_name)
-
+            else:
+                rename_file(self.current_node_path, new_node_name)
             self.rename_mode = False
             self.reload_page_hide_input()
             return
