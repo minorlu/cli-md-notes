@@ -6,7 +6,12 @@ from textual.widgets import Header, Footer, TextArea, Input
 from textual.containers import HorizontalGroup
 
 from cli_md_notes.widgets import FilteredDirectoryTree
-from cli_md_notes.core import create_folder, create_file
+from cli_md_notes.core import (
+    create_folder,
+    create_file,
+    delete_folder,
+    delete_file
+)
 
 
 class NotesScreen(Screen):
@@ -14,7 +19,9 @@ class NotesScreen(Screen):
     BINDINGS = [
         ("f", "create_folder", "Create folder"),
         ("m", "create_md", "Create md note"),
-        ("p", "create_txt", "Create plain note")
+        ("p", "create_txt", "Create plain note"),
+        ("d", "delete_node", "Delete"),
+        ("r", "rename_node", "Rename")
     ]
 
     def __init__(self, notes_path: Path) -> None:
@@ -86,3 +93,16 @@ class NotesScreen(Screen):
 
     def action_create_txt(self) -> None:
         self.create_node_helper("txt")
+
+    def action_delete_node(self) -> None:
+        directory_tree = self.query_one(FilteredDirectoryTree)
+        current_node = directory_tree.cursor_node
+        self.current_node_path = current_node.data.path
+
+        if self.current_node_path.is_dir():
+            delete_folder(self.current_node_path)
+        else:
+            delete_file(self.current_node_path)
+
+        directory_tree = self.query_one("#notes-directory")
+        directory_tree.reload()
