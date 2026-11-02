@@ -115,7 +115,12 @@ class NotesScreen(Screen):
     def action_delete_node(self) -> None:
         directory_tree = self.query_one(FilteredDirectoryTree)
         current_node = directory_tree.cursor_node
+
         self.current_node_path = current_node.data.path
+
+        if self.current_node_path == self.notes_path:
+            self.notify("You can't delete a root folder!")
+            return
 
         if self.current_node_path.is_dir():
             delete_folder(self.current_node_path)
