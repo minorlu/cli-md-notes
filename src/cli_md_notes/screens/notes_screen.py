@@ -2,7 +2,7 @@ from pathlib import Path
 
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea, Input
+from textual.widgets import Header, Footer, TextArea, Input, Tree
 from textual.containers import HorizontalGroup
 
 from cli_md_notes.widgets import FilteredDirectoryTree
@@ -14,6 +14,7 @@ from cli_md_notes.core import (
     rename_folder,
     rename_file
 )
+from cli_md_notes.utils import get_file_type
 
 
 class NotesScreen(Screen):
@@ -23,7 +24,8 @@ class NotesScreen(Screen):
         ("m", "create_md", "Create md note"),
         ("p", "create_txt", "Create plain note"),
         ("d", "delete_node", "Delete"),
-        ("r", "rename_node", "Rename")
+        ("r", "rename_node", "Rename"),
+        ("s", "save_file", "Save")
     ]
 
     def __init__(self, notes_path: Path) -> None:
@@ -32,6 +34,7 @@ class NotesScreen(Screen):
         self.current_node_path = self.notes_path
         self.node_type = ""
         self.rename_mode = False
+        self.open_file_path = ""
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -131,3 +134,33 @@ class NotesScreen(Screen):
 
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
+
+    def on_directory_tree_file_selected(self, event: FilteredDirectoryTree.FileSelected) -> None:
+        file_text_area = self.query_one("#notes-area")
+        file_path = event.path
+
+        with open(file_path, "r") as file:
+            file_content = file.read()
+
+        self.open_file_path = file_path
+        file_text_area.text = file_content
+
+        file_type = get_file_type(file_path)
+
+        if file_type == "md":
+            file_text_area.language = "markdown"
+        elif file_type == "txt":
+            file_text_area.language = "text"
+
+    def action_save_file(self) -> None:
+        file_text_area = self.query_one("#notes-area")
+
+        unsaved_file_content = file_text_area.text
+
+        if self.open_file_path == "":
+            self.notify("Please select a file!")
+            return
+
+        with open(self.open_file_path, "w") as file:
+            file.write(unsaved_file_content)
+            self.notify(f"File '{self.open_file_path}' saved!")
