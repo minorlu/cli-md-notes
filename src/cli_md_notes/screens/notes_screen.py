@@ -59,7 +59,12 @@ class NotesScreen(Screen):
         if self.rename_mode:
             try:
                 if self.current_node_path.is_dir():
-                    rename_folder(self.current_node_path, new_node_name)
+                    old_folder = self.current_node_path
+                    new_folder = rename_folder(old_folder, new_node_name)
+
+                    if self.open_file_path and self.open_file_path.is_relative_to(old_folder):
+                        relative_path = self.open_file_path.relative_to(old_folder)
+                        self.open_file_path = new_folder / relative_path
                 else:
                     new_file_path = rename_file(self.current_node_path, new_node_name)
                     self.open_file_path = Path(new_file_path)
