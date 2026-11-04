@@ -57,13 +57,17 @@ class NotesScreen(Screen):
             return
 
         if self.rename_mode:
-            if self.current_node_path.is_dir():
-                rename_folder(self.current_node_path, new_node_name)
-            else:
-                rename_file(self.current_node_path, new_node_name)
-            self.rename_mode = False
-            self.reload_page_hide_input()
-            return
+            try:
+                if self.current_node_path.is_dir():
+                    rename_folder(self.current_node_path, new_node_name)
+                else:
+                    rename_file(self.current_node_path, new_node_name)
+                self.rename_mode = False
+                self.reload_page_hide_input()
+                return
+            except Exception as ex:
+                self.notify(str(ex))
+                return
 
         try:
             match self.node_type:
