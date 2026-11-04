@@ -61,7 +61,8 @@ class NotesScreen(Screen):
                 if self.current_node_path.is_dir():
                     rename_folder(self.current_node_path, new_node_name)
                 else:
-                    rename_file(self.current_node_path, new_node_name)
+                    new_file_path = rename_file(self.current_node_path, new_node_name)
+                    self.open_file_path = Path(new_file_path)
                 self.rename_mode = False
                 self.reload_page_hide_input()
                 return
@@ -119,7 +120,7 @@ class NotesScreen(Screen):
         self.create_node_helper("txt")
 
     def action_delete_node(self) -> None:
-        directory_tree = self.query_one(FilteredDirectoryTree)
+        directory_tree = self.query_one("#notes-directory")
         current_node = directory_tree.cursor_node
 
         self.current_node_path = current_node.data.path
@@ -133,7 +134,12 @@ class NotesScreen(Screen):
         else:
             delete_file(self.current_node_path)
 
-        directory_tree = self.query_one("#notes-directory")
+        file_text_area = self.query_one("#notes-area")
+
+        if str(self.current_node_path) == str(self.open_file_path):
+            self.open_file_path = ""
+            file_text_area.text = ""
+
         directory_tree.reload()
 
 
@@ -164,6 +170,8 @@ class NotesScreen(Screen):
             file_text_area.language = "markdown"
         elif file_type == "txt":
             file_text_area.language = "text"
+
+        file_text_area.focus()
 
     def action_save_file(self) -> None:
         file_text_area = self.query_one("#notes-area")

@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 
-def rename_file(file_path: Path, new_file_name: str) -> None:
+def rename_file(file_path: Path, new_file_name: str) -> Path:
     if (new_file_name in {".", ".."}
         or "/" in new_file_name
         or "\\" in new_file_name):
@@ -17,3 +17,5 @@ def rename_file(file_path: Path, new_file_name: str) -> None:
         raise FileExistsError("This file already exists in selected directory.")
 
     os.rename(file_path, new_file_path)
+
+    return new_file_path
