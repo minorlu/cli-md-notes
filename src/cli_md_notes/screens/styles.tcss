@@ -11,7 +11,7 @@
     visibility: hidden;
 }
 
-DeleteScreen {
+DeleteScreen, SaveScreen {
     align: center middle;
 }
 

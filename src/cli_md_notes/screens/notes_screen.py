@@ -6,6 +6,7 @@ from textual.widgets import Header, Footer, TextArea, Input, Tree
 from textual.containers import HorizontalGroup
 
 from .delete_screen import DeleteScreen
+from .save_screen import SaveScreen
 from cli_md_notes.widgets import FilteredDirectoryTree
 from cli_md_notes.core import (
     create_folder,
@@ -44,7 +45,7 @@ class NotesScreen(Screen):
                     id="node-name-input")
         with HorizontalGroup():
             yield FilteredDirectoryTree(self.notes_path, id="notes-directory")
-            yield TextArea("", id="notes-area")
+            yield TextArea("", id="notes-area", language="markdown")
         yield Footer()
 
     def on_mount(self) -> None:
@@ -126,7 +127,6 @@ class NotesScreen(Screen):
         self.create_node_helper("txt")
 
     def action_delete_node(self) -> None:
-
         directory_tree = self.query_one("#notes-directory")
         current_node = directory_tree.cursor_node
 
@@ -160,7 +160,6 @@ class NotesScreen(Screen):
 
         directory_tree.reload()
 
-
     def action_rename_node(self) -> None:
         directory_tree = self.query_one(FilteredDirectoryTree)
         current_node = directory_tree.cursor_node
@@ -173,8 +172,20 @@ class NotesScreen(Screen):
         node_name_input.focus()
 
     def on_directory_tree_file_selected(self, event: FilteredDirectoryTree.FileSelected) -> None:
+        next_path = event.path
+
+        if self.open_file_path == "":
+            self.open_file(next_path)
+            return
+
+        self.app.push_screen(
+            SaveScreen(self.open_file_path),
+            callback=lambda button_id: self.confirm_save_node(button_id, next_path)
+        )
+
+    def open_file(self, path):
         file_text_area = self.query_one("#notes-area")
-        file_path = event.path
+        file_path = path
 
         with open(file_path, "r") as file:
             file_content = file.read()
@@ -191,15 +202,23 @@ class NotesScreen(Screen):
 
         file_text_area.focus()
 
-    def action_save_file(self) -> None:
+    def confirm_save_node(self, button_id, next_path) -> None:
+        if button_id == "yes":
+            self.save_file(self.open_file_path)
+        self.open_file(next_path)
+
+    def save_file(self, path) -> None:
         file_text_area = self.query_one("#notes-area")
 
         unsaved_file_content = file_text_area.text
 
-        if self.open_file_path == "":
+        if path == "":
             self.notify("Please select a file!")
             return
 
-        with open(self.open_file_path, "w") as file:
+        with open(path, "w") as file:
             file.write(unsaved_file_content)
-            self.notify(f"File '{self.open_file_path}' saved!")
+            self.notify(f"File '{path}' saved!")
+
+    def action_save_file(self) -> None:
+        self.save_file(self.open_file_path)
