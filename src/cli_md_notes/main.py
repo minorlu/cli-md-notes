@@ -2,8 +2,7 @@ from pathlib import Path
 
 from textual.app import App
 
-from .screens import ChoosePathScreen
-from .screens import NotesScreen
+from .screens import ChoosePathScreen, NotesScreen
 from .utils import get_init_dir, set_init_dir
 
 

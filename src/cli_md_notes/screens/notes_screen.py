@@ -5,6 +5,7 @@ from textual.screen import Screen
 from textual.widgets import Header, Footer, TextArea, Input, Tree
 from textual.containers import HorizontalGroup
 
+from .delete_screen import DeleteScreen
 from cli_md_notes.widgets import FilteredDirectoryTree
 from cli_md_notes.core import (
     create_folder,
@@ -125,6 +126,7 @@ class NotesScreen(Screen):
         self.create_node_helper("txt")
 
     def action_delete_node(self) -> None:
+
         directory_tree = self.query_one("#notes-directory")
         current_node = directory_tree.cursor_node
 
@@ -133,6 +135,17 @@ class NotesScreen(Screen):
         if Path(self.current_node_path) == Path(self.notes_path):
             self.notify("You can't delete a root folder!")
             return
+
+        self.app.push_screen(
+            DeleteScreen(self.current_node_path),
+            callback=self.confirm_delete_node
+        )
+
+    def confirm_delete_node(self, button_id: str) -> None:
+        if button_id != "yes":
+            return
+
+        directory_tree = self.query_one("#notes-directory")
 
         if self.current_node_path.is_dir():
             delete_folder(self.current_node_path)
