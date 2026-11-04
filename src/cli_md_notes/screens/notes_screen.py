@@ -120,7 +120,7 @@ class NotesScreen(Screen):
 
         self.current_node_path = current_node.data.path
 
-        if self.current_node_path == self.notes_path:
+        if Path(self.current_node_path) == Path(self.notes_path):
             self.notify("You can't delete a root folder!")
             return
 
@@ -131,6 +131,7 @@ class NotesScreen(Screen):
 
         directory_tree = self.query_one("#notes-directory")
         directory_tree.reload()
+
 
     def action_rename_node(self) -> None:
         directory_tree = self.query_one(FilteredDirectoryTree)
