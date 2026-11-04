@@ -20,12 +20,12 @@ from cli_md_notes.utils import get_file_type
 class NotesScreen(Screen):
     CSS_PATH = "styles.tcss"
     BINDINGS = [
-        ("f", "create_folder", "Create folder"),
-        ("m", "create_md", "Create md note"),
-        ("p", "create_txt", "Create plain note"),
-        ("d", "delete_node", "Delete"),
-        ("r", "rename_node", "Rename"),
-        ("s", "save_file", "Save")
+        ("f,F,а,А", "create_folder", "Create folder"),
+        ("m,M,ь,Ь", "create_md", "Create md note"),
+        ("p,P,з,З", "create_txt", "Create plain note"),
+        ("d,D,в,В", "delete_node", "Delete"),
+        ("r,R,к,К", "rename_node", "Rename"),
+        ("ctrl+s,ctrl+S,ctrl+ы,ctrl+Ы", "save_file", "Save")
     ]
 
     def __init__(self, notes_path: Path) -> None:
@@ -94,6 +94,7 @@ class NotesScreen(Screen):
         self.node_type = node_type
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
+        node_name_input.focus()
 
     def reload_page_hide_input(self):
         directory_tree = self.query_one("#notes-directory")
@@ -102,6 +103,7 @@ class NotesScreen(Screen):
         input_widget = self.query_one("#node-name-input")
         input_widget.clear()
         input_widget.add_class("input-hidden")
+        directory_tree.focus()
 
     def action_create_folder(self) -> None:
         self.create_node_helper("folder")
@@ -139,6 +141,7 @@ class NotesScreen(Screen):
 
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
+        node_name_input.focus()
 
     def on_directory_tree_file_selected(self, event: FilteredDirectoryTree.FileSelected) -> None:
         file_text_area = self.query_one("#notes-area")
