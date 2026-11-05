@@ -8,9 +8,6 @@ from .utils import get_init_dir, set_init_dir
 
 class CliMdNotesApp(App):
     CSS_PATH = "styles.tcss"
-    BINDINGS = [
-        ("c,C", "change_init_dir", "Change directory")
-    ]
 
     notes_path = None
     initial_dir = Path("/")
@@ -31,11 +28,7 @@ class CliMdNotesApp(App):
         self.notes_path = path
         set_init_dir(self.notes_path)
         self.push_screen(NotesScreen(self.notes_path))
-
-    def action_change_init_dir(self) -> None:
-        self.pop_screen()
-        self.push_screen(ChoosePathScreen(), callback=self.receive_path)
-
+        
 
 def main():
     app = CliMdNotesApp()

@@ -7,6 +7,7 @@ from textual.containers import HorizontalGroup
 
 from .delete_screen import DeleteScreen
 from .save_screen import SaveScreen
+from .choose_path_screen import ChoosePathScreen
 from cli_md_notes.widgets import FilteredDirectoryTree
 from cli_md_notes.core import (
     create_folder,
@@ -27,7 +28,8 @@ class NotesScreen(Screen):
         ("p,P,з,З", "create_txt", "Create plain note"),
         ("d,D,в,В", "delete_node", "Delete"),
         ("r,R,к,К", "rename_node", "Rename"),
-        ("ctrl+s,ctrl+S,ctrl+ы,ctrl+Ы", "save_file", "Save")
+        ("ctrl+s,ctrl+S,ctrl+ы,ctrl+Ы", "save_file", "Save"),
+        ("c,C,с,С", "change_init_dir", "Change directory")
     ]
 
     def __init__(self, notes_path: Path) -> None:
@@ -106,6 +108,7 @@ class NotesScreen(Screen):
             self.notify("Select folder, not file!")
             return
 
+        self.rename_mode = False
         self.node_type = node_type
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
@@ -118,6 +121,7 @@ class NotesScreen(Screen):
         input_widget = self.query_one("#node-name-input")
         input_widget.clear()
         input_widget.add_class("input-hidden")
+        self.rename_mode = False
         directory_tree.focus()
 
     def action_create_folder(self) -> None:
@@ -230,7 +234,14 @@ class NotesScreen(Screen):
     def confirm_save_node(self, button_id, next_path) -> None:
         if button_id == "yes":
             self.save_file(self.open_file_path)
-        self.open_file(next_path)
+
+        if next_path != None:
+            self.open_file(next_path)
+        else:
+            self.app.push_screen(
+                ChoosePathScreen(),
+                callback=self.app.receive_path
+                )
 
     def save_file(self, path) -> None:
         file_text_area = self.query_one("#notes-area")
@@ -248,3 +259,21 @@ class NotesScreen(Screen):
 
     def action_save_file(self) -> None:
         self.save_file(self.open_file_path)
+
+    def action_change_init_dir(self) -> None:
+        file_text_area = self.query_one("#notes-area")
+        current_content = file_text_area.text
+
+        if self.open_file_path == "" or self.saved_content == current_content:
+            self.app.push_screen(
+                ChoosePathScreen(),
+                callback=self.app.receive_path
+            )
+            return
+
+        self.app.push_screen(
+            SaveScreen(self.open_file_path),
+            callback=lambda button_id: self.confirm_save_node(
+                button_id, None
+                )
+        )
