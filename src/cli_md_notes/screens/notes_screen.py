@@ -37,6 +37,7 @@ class NotesScreen(Screen):
         self.node_type = ""
         self.rename_mode = False
         self.open_file_path = ""
+        self.saved_content = ""
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -68,8 +69,10 @@ class NotesScreen(Screen):
                         relative_path = self.open_file_path.relative_to(old_folder)
                         self.open_file_path = new_folder / relative_path
                 else:
-                    new_file_path = rename_file(self.current_node_path, new_node_name)
-                    self.open_file_path = Path(new_file_path)
+                    old_path = self.current_node_path
+                    new_file_path = rename_file(old_path, new_node_name)
+                    if self.open_file_path == old_path:
+                        self.open_file_path = Path(new_file_path)
                 self.rename_mode = False
                 self.reload_page_hide_input()
                 return
@@ -154,9 +157,13 @@ class NotesScreen(Screen):
 
         file_text_area = self.query_one("#notes-area")
 
-        if str(self.current_node_path) == str(self.open_file_path):
+        open_path = self.open_file_path
+        deleted_path = self.current_node_path
+
+        if open_path and open_path.is_relative_to(deleted_path):
             self.open_file_path = ""
             file_text_area.text = ""
+            self.saved_content = ""
 
         directory_tree.reload()
 
@@ -165,22 +172,38 @@ class NotesScreen(Screen):
         current_node = directory_tree.cursor_node
         self.current_node_path = current_node.data.path
 
+        if Path(self.current_node_path) == Path(self.notes_path):
+            self.notify("You can't rename a root folder!")
+            return
+
         self.rename_mode = True
 
         node_name_input = self.query_one("#node-name-input")
         node_name_input.remove_class("input-hidden")
         node_name_input.focus()
 
-    def on_directory_tree_file_selected(self, event: FilteredDirectoryTree.FileSelected) -> None:
+    def on_directory_tree_file_selected(
+            self,
+            event: FilteredDirectoryTree.FileSelected
+            ) -> None:
         next_path = event.path
+
+        file_text_area = self.query_one("#notes-area")
+        current_content = file_text_area.text
 
         if self.open_file_path == "":
             self.open_file(next_path)
             return
 
+        if self.saved_content == current_content:
+            self.open_file(next_path)
+            return
+
         self.app.push_screen(
             SaveScreen(self.open_file_path),
-            callback=lambda button_id: self.confirm_save_node(button_id, next_path)
+            callback=lambda button_id: self.confirm_save_node(
+                button_id, next_path
+                )
         )
 
     def open_file(self, path):
@@ -192,6 +215,8 @@ class NotesScreen(Screen):
 
         self.open_file_path = file_path
         file_text_area.text = file_content
+
+        self.saved_content = file_content
 
         file_type = get_file_type(file_path)
 
@@ -218,6 +243,7 @@ class NotesScreen(Screen):
 
         with open(path, "w") as file:
             file.write(unsaved_file_content)
+            self.saved_content = unsaved_file_content
             self.notify(f"File '{path}' saved!")
 
     def action_save_file(self) -> None:
