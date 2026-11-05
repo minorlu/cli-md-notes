@@ -234,14 +234,13 @@ class NotesScreen(Screen):
     def confirm_save_node(self, button_id, next_path) -> None:
         if button_id == "yes":
             self.save_file(self.open_file_path)
+        elif button_id != "no":
+            return
 
-        if next_path != None:
+        if next_path is not None:
             self.open_file(next_path)
         else:
-            self.app.push_screen(
-                ChoosePathScreen(),
-                callback=self.app.receive_path
-                )
+            self.show_path_picker()
 
     def save_file(self, path) -> None:
         file_text_area = self.query_one("#notes-area")
@@ -265,10 +264,7 @@ class NotesScreen(Screen):
         current_content = file_text_area.text
 
         if self.open_file_path == "" or self.saved_content == current_content:
-            self.app.push_screen(
-                ChoosePathScreen(),
-                callback=self.app.receive_path
-            )
+            self.show_path_picker()
             return
 
         self.app.push_screen(
@@ -276,4 +272,12 @@ class NotesScreen(Screen):
             callback=lambda button_id: self.confirm_save_node(
                 button_id, None
                 )
+        )
+
+    def show_path_picker(self) -> None:
+        app = self.app
+        app.pop_screen()
+        app.push_screen(
+            ChoosePathScreen(),
+            callback=app.receive_path,
         )
