@@ -48,7 +48,12 @@ class NotesScreen(Screen):
                     id="node-name-input")
         with HorizontalGroup():
             yield FilteredDirectoryTree(self.notes_path, id="notes-directory")
-            yield TextArea("", id="notes-area", language="markdown")
+            yield TextArea(
+                "",
+                id="notes-area",
+                language="markdown",
+                read_only=True
+                )
         yield Footer()
 
     def on_mount(self) -> None:
@@ -125,15 +130,19 @@ class NotesScreen(Screen):
         directory_tree.focus()
 
     def action_create_folder(self) -> None:
+        self.refresh_bindings()
         self.create_node_helper("folder")
 
     def action_create_md(self) -> None:
+        self.refresh_bindings()
         self.create_node_helper("md")
 
     def action_create_txt(self) -> None:
+        self.refresh_bindings()
         self.create_node_helper("txt")
 
     def action_delete_node(self) -> None:
+        self.refresh_bindings()
         directory_tree = self.query_one("#notes-directory")
         current_node = directory_tree.cursor_node
 
@@ -172,6 +181,7 @@ class NotesScreen(Screen):
         directory_tree.reload()
 
     def action_rename_node(self) -> None:
+        self.refresh_bindings()
         directory_tree = self.query_one(FilteredDirectoryTree)
         current_node = directory_tree.cursor_node
         self.current_node_path = current_node.data.path
@@ -193,6 +203,7 @@ class NotesScreen(Screen):
         next_path = event.path
 
         file_text_area = self.query_one("#notes-area")
+        file_text_area.read_only = False
         current_content = file_text_area.text
 
         if self.open_file_path == "":
@@ -264,9 +275,11 @@ class NotesScreen(Screen):
         return True
 
     def action_save_file(self) -> None:
+        self.refresh_bindings()
         self.save_file(self.open_file_path)
 
     def action_change_init_dir(self) -> None:
+        self.refresh_bindings()
         file_text_area = self.query_one("#notes-area")
         current_content = file_text_area.text
 
@@ -308,4 +321,22 @@ class NotesScreen(Screen):
             SaveScreen(self.open_file_path),
             callback=self.confirm_save_before_quit
             )      
-        
+
+    def check_action(
+            self, action: str, parameters: tuple[object, ...]
+    ) -> bool | None:
+        file_text_area = self.query_one("#notes-area")
+        if not file_text_area.read_only:
+            return True
+
+        if (action == "create_folder"
+            or action == "create_md"
+            or action == "create_txt"
+            or action == "delete_node"
+            or action == "rename_node"
+            or action == "save_file"
+            or action == "change_init_dir"):
+            if file_text_area.has_focus:
+                return False
+
+        return True
