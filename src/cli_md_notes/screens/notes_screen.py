@@ -34,12 +34,12 @@ class NotesScreen(Screen):
 
     def __init__(self, notes_path: Path) -> None:
         super().__init__()
-        self.notes_path = notes_path
-        self.current_node_path = self.notes_path
-        self.node_type = ""
-        self.rename_mode = False
-        self.open_file_path = ""
-        self.saved_content = ""
+        self.notes_path: Path = notes_path
+        self.current_node_path: Path = self.notes_path
+        self.node_type: str = ""
+        self.rename_mode: bool = False
+        self.open_file_path: Path = ""
+        self.saved_content: str = ""
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -78,8 +78,8 @@ class NotesScreen(Screen):
                 else:
                     old_path = self.current_node_path
                     new_file_path = rename_file(old_path, new_node_name)
-                    if self.open_file_path == old_path:
-                        self.open_file_path = Path(new_file_path)
+                    if self.open_file_path in old_path:
+                        self.open_file_path = new_file_path
                 self.rename_mode = False
                 self.reload_page_hide_input()
                 return
@@ -148,7 +148,7 @@ class NotesScreen(Screen):
 
         self.current_node_path = current_node.data.path
 
-        if Path(self.current_node_path) == Path(self.notes_path):
+        if self.current_node_path in self.notes_path:
             self.notify("You can't delete a root folder!")
             return
 
@@ -191,7 +191,7 @@ class NotesScreen(Screen):
         current_node = directory_tree.cursor_node
         self.current_node_path = current_node.data.path
 
-        if Path(self.current_node_path) == Path(self.notes_path):
+        if self.current_node_path in self.notes_path:
             self.notify("You can't rename a root folder!")
             return
 
@@ -210,7 +210,7 @@ class NotesScreen(Screen):
         file_text_area = self.query_one("#notes-area")
         current_content = file_text_area.text
 
-        if self.open_file_path == "":
+        if self.open_file_path:
             self.open_file(next_path)
             return
 
@@ -225,7 +225,7 @@ class NotesScreen(Screen):
                 )
         )
 
-    def open_file(self, path):
+    def open_file(self, path: Path) -> None:
         file_text_area = self.query_one("#notes-area")
         file_path = path
 
@@ -246,12 +246,12 @@ class NotesScreen(Screen):
         if file_type == "md":
             file_text_area.language = "markdown"
         elif file_type == "txt":
-            file_text_area.language = "text"
+            file_text_area.language = ""
 
         file_text_area.read_only = False
         file_text_area.focus()
 
-    def confirm_save_node(self, button_id, next_path) -> None:
+    def confirm_save_node(self, button_id: str, next_path: Path) -> None:
         if button_id == "yes":
             if not self.save_file(self.open_file_path):
                 return
@@ -263,8 +263,8 @@ class NotesScreen(Screen):
         else:
             self.show_path_picker()
 
-    def save_file(self, path) -> bool:
-        if path == "":
+    def save_file(self, path: Path) -> bool:
+        if not path:
             self.notify("Please select a file!")
             return False
         
@@ -293,7 +293,7 @@ class NotesScreen(Screen):
         file_text_area = self.query_one("#notes-area")
         current_content = file_text_area.text
 
-        if self.open_file_path == "" or self.saved_content == current_content:
+        if self.open_file_path or self.saved_content == current_content:
             self.show_path_picker()
             return
 
