@@ -83,7 +83,7 @@ class NotesScreen(Screen):
                 self.rename_mode = False
                 self.reload_page_hide_input()
                 return
-            except Exception as ex:
+            except (ValueError, FileExistsError, OSError) as ex:
                 self.notify(str(ex))
                 return
 
@@ -98,7 +98,7 @@ class NotesScreen(Screen):
                         self.node_type)
                 case _:
                     self.notify("Unexpected error! Try again")
-        except Exception as ex:
+        except (ValueError, FileExistsError, OSError) as ex:
             self.notify(str(ex))
             return
 
@@ -163,10 +163,14 @@ class NotesScreen(Screen):
 
         directory_tree = self.query_one("#notes-directory")
 
-        if self.current_node_path.is_dir():
-            delete_folder(self.current_node_path)
-        else:
-            delete_file(self.current_node_path)
+        try:
+            if self.current_node_path.is_dir():
+                delete_folder(self.current_node_path)
+            else:
+                delete_file(self.current_node_path)
+        except (OSError, ValueError) as ex:
+            self.notify(str(ex))
+            return
 
         file_text_area = self.query_one("#notes-area")
 
