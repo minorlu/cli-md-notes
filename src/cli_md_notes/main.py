@@ -1,3 +1,4 @@
+from json import JSONDecodeError
 from pathlib import Path
 
 from textual.app import App
@@ -16,7 +17,12 @@ class CliMdNotesApp(App):
     def on_mount(self) -> None:
         self.title = "CLI MD-Notes"
         self.app.theme = "tokyo-night"
-        self.initial_dir = get_init_dir()
+        try:
+            self.initial_dir = get_init_dir()
+        except (OSError, ValueError) as er:
+            self.notify(
+                f"Error when opening initial directory from config: {er}"
+                )
         if not self.initial_dir:
             self.push_screen(ChoosePathScreen(), callback=self.receive_path)
         else:

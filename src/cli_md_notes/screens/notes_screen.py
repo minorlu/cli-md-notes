@@ -233,7 +233,7 @@ class NotesScreen(Screen):
             with open(file_path, "r", encoding="utf-8") as file:
                 file_content = file.read()
         except (OSError, UnicodeError) as er:
-            self.notify(f"Can't opeen file: {er}")
+            self.notify(f"Can't open file: {er}")
             return
 
         self.open_file_path = file_path
