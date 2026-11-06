@@ -83,7 +83,7 @@ class NotesScreen(Screen):
                 self.rename_mode = False
                 self.reload_page_hide_input()
                 return
-            except (ValueError, FileExistsError, OSError) as ex:
+            except (ValueError, OSError) as ex:
                 self.notify(str(ex))
                 return
 
@@ -98,7 +98,7 @@ class NotesScreen(Screen):
                         self.node_type)
                 case _:
                     self.notify("Unexpected error! Try again")
-        except (ValueError, FileExistsError, OSError) as ex:
+        except (ValueError, OSError) as ex:
             self.notify(str(ex))
             return
 
@@ -181,6 +181,7 @@ class NotesScreen(Screen):
             self.open_file_path = ""
             file_text_area.text = ""
             self.saved_content = ""
+            file_text_area.read_only = True
 
         directory_tree.reload()
 
@@ -207,7 +208,6 @@ class NotesScreen(Screen):
         next_path = event.path
 
         file_text_area = self.query_one("#notes-area")
-        file_text_area.read_only = False
         current_content = file_text_area.text
 
         if self.open_file_path == "":
@@ -248,6 +248,7 @@ class NotesScreen(Screen):
         elif file_type == "txt":
             file_text_area.language = "text"
 
+        file_text_area.read_only = False
         file_text_area.focus()
 
     def confirm_save_node(self, button_id, next_path) -> None:
