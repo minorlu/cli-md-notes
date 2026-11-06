@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from textual.app import App
+from textual.screen import ModalScreen
 
 from .screens import ChoosePathScreen, NotesScreen
 from .utils import get_init_dir, set_init_dir
@@ -28,7 +29,15 @@ class CliMdNotesApp(App):
         self.notes_path = path
         set_init_dir(self.notes_path)
         self.push_screen(NotesScreen(self.notes_path))
-        
+
+    def action_quit(self) -> None:
+        if isinstance(self.screen, ModalScreen):
+            return
+
+        if isinstance(self.screen, NotesScreen):
+            self.screen.request_quit()
+        else:
+            self.exit()
 
 def main():
     app = CliMdNotesApp()

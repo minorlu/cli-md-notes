@@ -242,19 +242,26 @@ class NotesScreen(Screen):
         else:
             self.show_path_picker()
 
-    def save_file(self, path) -> None:
-        file_text_area = self.query_one("#notes-area")
-
-        unsaved_file_content = file_text_area.text
-
+    def save_file(self, path) -> bool:
         if path == "":
             self.notify("Please select a file!")
-            return
+            return False
+        
+        file_text_area = self.query_one("#notes-area")
+        unsaved_file_content = file_text_area.text
 
-        with open(path, "w") as file:
-            file.write(unsaved_file_content)
-            self.saved_content = unsaved_file_content
-            self.notify(f"File '{path}' saved!")
+        try:
+            with open(path, "w") as file:
+                file.write(unsaved_file_content)
+        except (OSError, UnicodeError) as er:
+            self.notify(
+                f"Error while saving file: {er}"
+            )
+            return False
+        
+        self.saved_content = unsaved_file_content
+        self.notify(f"File '{path}' saved!")
+        return True
 
     def action_save_file(self) -> None:
         self.save_file(self.open_file_path)
@@ -281,3 +288,24 @@ class NotesScreen(Screen):
             ChoosePathScreen(),
             callback=app.receive_path,
         )
+
+    def confirm_save_before_quit(self, button_id) -> None:
+        if button_id == "yes":
+            if self.save_file(self.open_file_path):
+                self.app.exit()
+        elif button_id == "no":
+            self.app.exit()
+
+    def request_quit(self) -> None:
+        file_text_area = self.query_one("#notes-area")
+        current_content = file_text_area.text
+
+        if self.saved_content == current_content:
+            self.app.exit()
+            return
+
+        self.app.push_screen(
+            SaveScreen(self.open_file_path),
+            callback=self.confirm_save_before_quit
+            )      
+        
