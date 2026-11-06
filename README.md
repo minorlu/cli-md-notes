@@ -44,6 +44,7 @@ Once all the necessary conditions have been met:
 ```sh
 uv run cli-md-notes
 ```
+***The application should only be launched from the root folder of cli-md-notes***
 
 #### Hotkeys
 | Key      | Action                    |
