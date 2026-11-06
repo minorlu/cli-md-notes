@@ -210,10 +210,6 @@ class NotesScreen(Screen):
         file_text_area = self.query_one("#notes-area")
         current_content = file_text_area.text
 
-        if self.open_file_path:
-            self.open_file(next_path)
-            return
-
         if self.saved_content == current_content:
             self.open_file(next_path)
             return
