@@ -229,8 +229,12 @@ class NotesScreen(Screen):
         file_text_area = self.query_one("#notes-area")
         file_path = path
 
-        with open(file_path, "r") as file:
-            file_content = file.read()
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                file_content = file.read()
+        except (OSError, UnicodeError) as er:
+            self.notify(f"Can't opeen file: {er}")
+            return
 
         self.open_file_path = file_path
         file_text_area.text = file_content
@@ -248,7 +252,8 @@ class NotesScreen(Screen):
 
     def confirm_save_node(self, button_id, next_path) -> None:
         if button_id == "yes":
-            self.save_file(self.open_file_path)
+            if not self.save_file(self.open_file_path):
+                return
         elif button_id != "no":
             return
 
@@ -266,7 +271,7 @@ class NotesScreen(Screen):
         unsaved_file_content = file_text_area.text
 
         try:
-            with open(path, "w") as file:
+            with open(path, "w", encoding="utf-8") as file:
                 file.write(unsaved_file_content)
         except (OSError, UnicodeError) as er:
             self.notify(

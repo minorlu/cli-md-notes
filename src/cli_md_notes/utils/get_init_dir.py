@@ -8,7 +8,7 @@ def get_init_dir() -> Path | bool:
     if not os.path.exists(config_file_path):
         return False
 
-    with open(config_file_path, "r") as config_file:
+    with open(config_file_path, "r", encoding="utf-8") as config_file:
         if config_file.read() == "":
             return False
         

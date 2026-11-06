@@ -13,6 +13,6 @@ def create_file(path: Path, file_name: str, file_extension: str) -> Path | None:
     if os.path.exists(new_path):
         raise FileExistsError("This file already exists in selected directory.")
 
-    file = open(new_path, "x")
+    file = open(new_path, "x", encoding="utf-8")
     return new_path
     
